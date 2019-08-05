@@ -1,4 +1,5 @@
 from functools import wraps, partial
+import os
 
 
 def debug(func):
@@ -254,4 +255,3 @@ class Point(Structure):
 
 class Host(Structure):
     _fields = ['hostname', 'port']
-
