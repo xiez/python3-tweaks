@@ -1,0 +1,25 @@
+class Task:
+    taskid = 0
+
+    def __init__(self, target):
+        Task.taskid += 1
+        self.tid = Task.taskid
+        self.target = target
+        self.sendval = None
+
+    def run(self):
+        return self.target.send(self.sendval)
+
+
+if __name__ == '__main__':
+
+    def foo():
+        print("part 1")
+        yield
+
+        print("part 2")
+        yield
+
+    t1 = Task(foo())
+    t1.run()
+    t1.run()
