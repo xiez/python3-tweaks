@@ -6,6 +6,17 @@ def do_func(x, y):
 
 run_inline_future(do_func)
 '''
+from concurrent.futures import Future
+
+def patch_future(cls):
+    def __iter__(self):
+        if not self.done():
+            yield self
+        return self.result()
+    cls.__iter__ = __iter__
+
+patch_future(Future)
+
 
 class Task:
     def __init__(self, gen):
@@ -54,41 +65,11 @@ if __name__ == '__main__':
         print('after submit')
         print(f'Got: {result}')
 
-    def do_many(n, val):
-        while n > 0:
-            result = yield pool.submit(func, n, val)
-            print(f'Got: {result}')
-            n -= 1
-
-            time.sleep(0.1)
-
-    def after(delay, gen):
+    def after5(delay, gen):
         yield from pool.submit(time.sleep, delay)
-        # result = None
-        # try:
-        #     while True:
-        #         f = gen.send(result)
-        #         result = yield f
-        # except StopIteration:
-        #     pass
         yield from gen
 
-    Task(after(3, do_func(2, 3))).step()
-
-    # # t = Task(do_func(2, 3))
-    # # t.step()
-
-    # t = Task(do_many(3, '1'))
-    # t.step()
-
-    # t2 = Task(do_many(3, 2))
-    # t2.step()
-
-    # # while not t.is_finished():
-    # #     time.sleep(0.5)
-
-    # t.join()
-    # t2.join()
+    Task(after5(3, do_func(2, 3))).step()
 
     time.sleep(30)
 

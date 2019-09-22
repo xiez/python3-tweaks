@@ -54,41 +54,33 @@ if __name__ == '__main__':
         print('after submit')
         print(f'Got: {result}')
 
-    def do_many(n, val):
-        while n > 0:
-            result = yield pool.submit(func, n, val)
-            print(f'Got: {result}')
-            n -= 1
+    def after1(delay, gen):
+        yield pool.submit(time.sleep, delay)
+        yield gen
 
-            time.sleep(0.1)
+    def after2(delay, gen):
+        yield pool.submit(time.sleep, delay)
+        for f in gen:
+            yield f
 
-    def after(delay, gen):
-        yield from pool.submit(time.sleep, delay)
-        # result = None
-        # try:
-        #     while True:
-        #         f = gen.send(result)
-        #         result = yield f
-        # except StopIteration:
-        #     pass
+    def after3(delay, gen):
+        yield pool.submit(time.sleep, delay)
+        result = None
+        try:
+            while True:
+                f = gen.send(result)
+                result = yield f
+        except StopIteration:
+            pass
+
+    def after4(delay, gen):
+        yield pool.submit(time.sleep, delay)
         yield from gen
 
-    Task(after(3, do_func(2, 3))).step()
-
-    # # t = Task(do_func(2, 3))
-    # # t.step()
-
-    # t = Task(do_many(3, '1'))
-    # t.step()
-
-    # t2 = Task(do_many(3, 2))
-    # t2.step()
-
-    # # while not t.is_finished():
-    # #     time.sleep(0.5)
-
-    # t.join()
-    # t2.join()
+    # Task(after1(3, do_func(2, 3))).step()
+    # Task(after2(3, do_func(2, 3))).step()
+    # Task(after3(3, do_func(2, 3))).step()
+    Task(after4(3, do_func(2, 3))).step()
 
     time.sleep(30)
 
